@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Image Slider</title>
+    <style>
+       
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .slider-container {
+            width: 600px;
+            max-width: 90vw;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .slider-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slider-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            padding: 15px;
+            margin: 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            transform: translateY(-50%);
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .nav-btn {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: white;
+        }
+        
+        #slide-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .controls-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            max-width: 90vw;
+        }
+
+        .controls-container h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        .input-form, .autoplay-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .input-form input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+   
+        <div class="slider-container">
+            <img src="" alt="Slider Image" id="slider-image" class="slider-image">
+            <p id="slider-caption" class="slider-caption"></p>
+            <div id="slide-counter"></div>
+            <div class="navigation">
+                <button id="prev-btn" class="nav-btn">❮</button>
+                <button id="next-btn" class="nav-btn">❯</button>
+            </div>
+        </div>
+
+        
+        <div class="controls-container">
+            <h3>Slider Controls</h3>
+            <div class="input-form">
+                <input type="text" id="img-url-input" placeholder="Enter Image URL">
+                <input type="text" id="caption-input" placeholder="Enter Caption">
+                <button id="add-btn" class="btn">Add Image</button>
+            </div>
+            <div class="autoplay-controls">
+                <button id="autoplay-btn" class="btn">Auto-play</button>
+                <button id="pause-btn" class="btn">Pause</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+           
+            const images = [
+                {
+                    img: "https://cdn.getyourguide.com/image/format=auto,fit=crop,gravity=auto,quality=60,width=535,height=400,dpr=1/tour_img/2849c5dd4606a53014d5371a9f0feabca062f32c95e0364768498e2b0bfe3ecf.jpg",
+                    caption: "Beautiful Pink City "
+                },
+                {
+                    img: "https://www.indianholidaytrip.com/Upload/Blog/Img_3518_202328241039_SOU_1.jpg",
+                    caption: "Statue of unity"
+                },
+                {
+                    img: "https://as1.ftcdn.net/v2/jpg/05/02/48/70/1000_F_502487005_nVDDbjXLEZ2YLNc6UQNqYt19T3MiSsp7.jpg",
+                    caption: "Misty Forest Path"
+                },
+                {
+                    img: "https://miro.medium.com/v2/resize:fit:720/format:webp/1*rPybpXRlwvEIQ4vynbSVeA.jpeg",
+                    caption: "Golden Hour in the Valley"
+                }
+            ];
+
+          
+            const sliderImage = document.getElementById('slider-image');
+            const sliderCaption = document.getElementById('slider-caption');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const slideCounter = document.getElementById('slide-counter');
+            
+         
+            const addBtn = document.getElementById('add-btn');
+            const imgUrlInput = document.getElementById('img-url-input');
+            const captionInput = document.getElementById('caption-input');
+            const autoplayBtn = document.getElementById('autoplay-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+
+            let currentIndex = 0;
+            let autoplayInterval = null;
+
+            
+            const showSlide = (index) => {
+              
+                const currentSlide = images[index];
+                sliderImage.src = currentSlide.img;
+                sliderCaption.textContent = currentSlide.caption;
+                
+               
+                slideCounter.textContent = `Slide ${index + 1} of ${images.length}`;
+                
+                console.log(`Slide ${index + 1}: ${currentSlide.caption}`);
+            };
+
+       
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < images.length - 1) {
+                    currentIndex++;
+                    showSlide(currentIndex);
+                } else {
+                    console.log("Message: This is the last slide.");
+                    alert("This is the last slide.");
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    showSlide(currentIndex);
+                } else {
+                    console.log("Message: This is the first slide.");
+                    alert("This is the first slide.");
+                }
+            });
+
+            addBtn.addEventListener('click', () => {
+                const newImgUrl = imgUrlInput.value.trim();
+                const newCaption = captionInput.value.trim();
+
+                if (newImgUrl && newCaption) {
+                    const newImage = {
+                        img: newImgUrl,
+                        caption: newCaption
+                    };
+                    images.push(newImage); 
+                    
+                   
+                    currentIndex = images.length - 1;
+                    showSlide(currentIndex);
+                    
+                    console.log(`Added new image: ${newCaption}`);
+                    
+              
+                    imgUrlInput.value = '';
+                    captionInput.value = '';
+                } else {
+                    alert("Please provide both an image URL and a caption.");
+                }
+            });
+
+           
+            const startAutoplay = () => {
+                if (autoplayInterval === null) { 
+                    autoplayInterval = setInterval(() => {
+                        currentIndex = (currentIndex + 1) % images.length;
+                        showSlide(currentIndex);
+                    }, 3000); 
+                    console.log("Auto-play started.");
+                }
+            };
+            
+            const pauseAutoplay = () => {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null; 
+                console.log("Auto-play paused.");
+            };
+            
+            autoplayBtn.addEventListener('click', startAutoplay);
+            pauseBtn.addEventListener('click', pauseAutoplay);
+            
+           
+            showSlide(currentIndex);
+        });
+    </script>
+</body>
+</html>
